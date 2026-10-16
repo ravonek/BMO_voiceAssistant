@@ -7,14 +7,14 @@ Run on 2026-10-16 on macOS arm64 / Python 3.11.6:
 | Check | Result |
 |---|---|
 | `ruff check bmo tests` | passed, no findings |
-| `pytest -q` | 23 passed in 0.39 s |
+| `pytest -q` | 25 passed in 0.48 s, including follow-up and camera failure |
 | `bmo --help` | passed; all expected commands present |
 | `bmo doctor --json` | passed; correctly reported missing Pi USB hardware |
 | Secret-pattern scan | passed; no project key pattern in ZIP |
 | Piper asset SHA256 RU/EN | passed |
 | Piper RU synthesis | valid mono WAV, 22050 Hz, 39168 frames |
 | Piper EN synthesis | valid mono WAV, 22050 Hz, 48384 frames |
-| Clean install from release ZIP | passed; 23 tests and CLI help |
+| Clean install from release ZIP | passed; tests and CLI help |
 
 No OpenAI endpoint was called and no API cost was incurred.
 

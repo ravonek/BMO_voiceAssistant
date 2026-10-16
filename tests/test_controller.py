@@ -56,6 +56,29 @@ async def test_vision_only_for_explicit_request() -> None:
     assert llm.images == 1
 
 
+class FailingCamera:
+    async def capture(self):
+        raise RuntimeError("camera busy")
+
+
+@pytest.mark.asyncio
+async def test_camera_failure_keeps_voice_dialog_available() -> None:
+    llm = MockLLMProvider()
+    tts = MockTTSProvider()
+    controller = AssistantController(
+        Settings(),
+        stt=MockSTTProvider("Что ты видишь?", "ru"),
+        llm=llm,
+        tts=tts,
+        camera=FailingCamera(),
+    )
+    await ready(controller)
+    await controller.submit_audio(clip(), allow_followup=False)
+    assert controller.state is AssistantState.IDLE
+    assert llm.calls == 0
+    assert "Не удалось получить кадр" in tts.spoken[0][0]
+
+
 @pytest.mark.asyncio
 async def test_local_time_does_not_call_llm() -> None:
     llm = MockLLMProvider()
@@ -84,3 +107,35 @@ async def test_cancel_drops_late_operation() -> None:
     await task
     assert controller.state is AssistantState.IDLE
     assert not tts.spoken
+
+
+class OneFollowupAudio:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    async def record_followup(self, timeout_sec: float) -> AudioClip | None:
+        assert timeout_sec == 5.0
+        self.calls += 1
+        return clip() if self.calls == 1 else None
+
+
+@pytest.mark.asyncio
+async def test_followup_turn_runs_without_new_wake_or_ptt() -> None:
+    settings = Settings()
+    settings.audio.anti_echo_cooldown_sec = 0
+    stt = MockSTTProvider("Продолжение", "ru")
+    llm = MockLLMProvider("Ответ")
+    followup = OneFollowupAudio()
+    controller = AssistantController(
+        settings,
+        stt=stt,
+        llm=llm,
+        tts=MockTTSProvider(),
+        audio_input=followup,
+    )
+    await ready(controller)
+    await controller.submit_audio(clip())
+    assert controller.state is AssistantState.IDLE
+    assert stt.calls == 2
+    assert llm.calls == 2
+    assert followup.calls == 2
