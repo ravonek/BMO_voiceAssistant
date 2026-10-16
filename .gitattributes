@@ -1,0 +1,6 @@
+# Keep upstream legacy files in Git history, but do not ship them in the cloud release archive.
+agent.py export-ignore
+config.json export-ignore
+be-more-agent.desktop export-ignore
+wakeword.onnx export-ignore
+

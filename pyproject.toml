@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bmo-cloud-assistant"
+version = "0.1.0"
+description = "Headless-first bilingual BMO voice assistant for Raspberry Pi 5"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+license = { text = "MIT" }
+authors = [
+  { name = "brenpoly (upstream)" },
+  { name = "BMO Cloud adaptation contributors" },
+]
+dependencies = [
+  "numpy==2.2.6",
+  "openai==3.31.0",
+  "PyYAML==6.0.3",
+  "sounddevice==0.5.6",
+]
+
+[project.optional-dependencies]
+tts = ["piper-tts==1.8.0"]
+vision = ["opencv-python-headless==4.12.0.88"]
+dev = [
+  "pytest==9.1.1",
+  "pytest-asyncio==1.4.0",
+  "ruff==0.14.14",
+]
+
+[project.scripts]
+bmo = "bmo.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["bmo*"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+asyncio_mode = "auto"
+markers = [
+  "hardware: requires Raspberry Pi or attached USB hardware",
+  "paid: makes an explicitly authorized paid API call",
+]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+

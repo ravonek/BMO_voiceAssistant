@@ -1,0 +1,52 @@
+app:
+  language: auto
+  headless: true
+  timezone: Asia/Almaty
+  log_format: plain
+
+audio:
+  preferred_input_name: "KT USB Audio"
+  preferred_output_name: "KT USB Audio"
+  sample_rate: 16000
+  channels: 1
+  followup_timeout_sec: 5.0
+  anti_echo_cooldown_sec: 0.35
+  start_speech_timeout_sec: 10.0
+  end_silence_sec: 1.2
+  max_utterance_sec: 30.0
+  vad_rms_threshold: 500
+
+camera:
+  usb_vid: "0bda"
+  usb_pid: "5842"
+  device: auto
+  format: YUYV
+  width: 640
+  height: 480
+  fps: 30
+  rotation: 0
+  keep_photos: false
+
+cloud:
+  llm_model: "${BMO_LLM_MODEL}"
+  stt_model: "${BMO_STT_MODEL}"
+  reasoning_effort: none
+  max_output_tokens: 300
+  request_timeout_sec: 30
+  max_retries: 2
+  store_responses: false
+  use_web_search: false
+  daily_warning_usd: 0.20
+  daily_hard_limit_usd: 0.40
+  monthly_warning_usd: 3.50
+  monthly_hard_limit_usd: 4.50
+
+speech:
+  piper_executable: piper
+  voice_ru: voices/ru_RU-dmitri-medium.onnx
+  voice_en: voices/en_US-kristin-medium.onnx
+
+memory:
+  max_recent_turns: 12
+  persist_transcripts: false
+

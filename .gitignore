@@ -6,6 +6,15 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
 .env
 
 # --- Large Models & Binaries (Auto-downloaded) ---
@@ -24,6 +33,10 @@ piper/
 # Keep chat history local (Privacy)
 memory.json
 chat_memory.json
+state/
+logs/
+diagnostics/
+config.yaml
 
 # Keep personal API keys or settings local
 # (Optional: comment this out if you WANT to share your config)
@@ -37,6 +50,9 @@ chat_memory.json
 camera_capture.jpg
 current_image.jpg
 test_audio.wav
+
+# Local voice models are downloaded and checksum-verified on the target.
+voices/
 
 # --- OS Generated Files ---
 .DS_Store

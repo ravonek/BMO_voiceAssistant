@@ -1,8 +1,3 @@
-sounddevice
-numpy
-scipy
-openwakeword
-onnxruntime
-ollama
-duckduckgo-search
-Pillow
+# Compatibility helper for users who still invoke pip -r requirements.txt.
+# The canonical dependency specification is pyproject.toml.
+-e .[tts,vision]

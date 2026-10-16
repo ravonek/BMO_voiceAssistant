@@ -1,0 +1,18 @@
+[Unit]
+Description=BMO Cloud Assistant (headless)
+After=network-online.target sound.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=@PROJECT_DIR@
+Environment=BMO_CONFIG=%h/.config/bmo/config.yaml
+EnvironmentFile=%h/.config/bmo/.env
+ExecStart=@PROJECT_DIR@/.venv/bin/bmo run --headless
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target
