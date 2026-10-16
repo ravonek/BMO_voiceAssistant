@@ -10,10 +10,11 @@ Run on 2026-10-16 on macOS arm64 / Python 3.11.6:
 | `pytest -q` | 23 passed in 0.39 s |
 | `bmo --help` | passed; all expected commands present |
 | `bmo doctor --json` | passed; correctly reported missing Pi USB hardware |
-| Secret-pattern scan | pending final package scan |
+| Secret-pattern scan | passed; no project key pattern in ZIP |
 | Piper asset SHA256 RU/EN | passed |
 | Piper RU synthesis | valid mono WAV, 22050 Hz, 39168 frames |
 | Piper EN synthesis | valid mono WAV, 22050 Hz, 48384 frames |
+| Clean install from release ZIP | passed; 23 tests and CLI help |
 
 No OpenAI endpoint was called and no API cost was incurred.
 
