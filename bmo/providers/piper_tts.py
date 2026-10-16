@@ -11,6 +11,12 @@ from bmo.config import SpeechConfig
 
 
 def normalize_for_speech(text: str) -> str:
+    # Remove emoji and pictographic symbols before speech synthesis.
+    text = re.sub(
+        r"[\U0001F000-\U0001FAFF\u2600-\u27BF\uFE0F\u200D]",
+        "",
+        text,
+    )
     text = re.sub(r"```.*?```", " ", text, flags=re.DOTALL)
     text = re.sub(r"[`*_#>|]", " ", text)
     text = re.sub(r"https?://\S+", "ссылка", text)

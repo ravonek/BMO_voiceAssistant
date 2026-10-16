@@ -163,7 +163,25 @@ class SoundDeviceAudioOutput:
         await asyncio.to_thread(self._play_blocking, samples, sample_rate)
 
     def _play_blocking(self, samples: np.ndarray, sample_rate: int) -> None:
-        self.sd.play(samples, samplerate=sample_rate, device=self.device.index, blocking=True)
+        target_rate = int(self.device.default_sample_rate)
+
+        if sample_rate != target_rate and len(samples) > 0:
+            old_positions = np.arange(len(samples), dtype=np.float64)
+            new_count = round(len(samples) * target_rate / sample_rate)
+            new_positions = (
+                np.arange(new_count, dtype=np.float64)
+                * sample_rate / target_rate
+            )
+            samples = np.interp(
+                new_positions, old_positions, samples
+            ).astype(np.int16)
+
+        self.sd.play(
+            samples,
+            samplerate=target_rate,
+            device=self.device.index,
+            blocking=True,
+        )
 
     async def cancel(self) -> None:
         await asyncio.to_thread(self.sd.stop)

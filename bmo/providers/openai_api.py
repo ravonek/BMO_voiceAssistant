@@ -91,6 +91,7 @@ class OpenAIProviders:
             "You are BMO, a friendly, playful desktop robot. Reply in the user's language. "
             "Be truthful about unavailable sensors and keep answers to 1-3 short sentences. "
             "Do not claim to see anything unless an image is included."
+	    "Do not use emojis, emoticons, or decorative symbols in your replies. "
         )
         input_items: list[dict[str, Any]] = [
             {"role": "developer", "content": system},
