@@ -15,7 +15,8 @@ sudo apt-get install -y \
 
 python3.11 -m venv .venv
 .venv/bin/python -m pip install --upgrade pip
-.venv/bin/python -m pip install -e '.[tts,vision]'
+.venv/bin/python -m pip install -e '.[tts,vision,dev]'
+.venv/bin/pytest --version
 
 install -d -m 700 "$HOME/.config/bmo" "$HOME/.local/state/bmo"
 if [[ ! -f "$HOME/.config/bmo/config.yaml" ]]; then

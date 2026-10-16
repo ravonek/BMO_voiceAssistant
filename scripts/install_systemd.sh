@@ -9,4 +9,5 @@ systemctl --user daemon-reload
 systemctl --user enable bmo-headless.service
 echo "Installed but did not start bmo-headless.service."
 echo "After hardware/API checks: systemctl --user start bmo-headless.service"
+echo "Control it with: $PROJECT_DIR/.venv/bin/bmo control status"
 

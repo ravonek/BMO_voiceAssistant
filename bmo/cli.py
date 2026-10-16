@@ -19,10 +19,11 @@ from bmo.budget import BudgetGuard
 from bmo.config import Settings, load_settings
 from bmo.core.controller import AssistantController
 from bmo.doctor import collect_diagnostics, render_diagnostics
-from bmo.headless import run_headless
+from bmo.headless import run_interactive
 from bmo.providers.openai_api import OpenAIProviders
 from bmo.providers.piper_tts import PiperTTSProvider
 from bmo.security import load_dotenv_secure
+from bmo.service import CONTROL_COMMANDS, run_background_service, send_control_command
 from bmo.vision.camera import OpenCVCameraProvider
 
 
@@ -37,8 +38,39 @@ def _parser() -> argparse.ArgumentParser:
 
     run = sub.add_parser("run", help="run the assistant")
     mode = run.add_mutually_exclusive_group()
-    mode.add_argument("--headless", action="store_true", default=True)
-    mode.add_argument("--gui", action="store_true")
+    mode.add_argument(
+        "--interactive",
+        dest="run_mode",
+        action="store_const",
+        const="interactive",
+        help="keyboard PTT using interactive stdin",
+    )
+    mode.add_argument(
+        "--service",
+        dest="run_mode",
+        action="store_const",
+        const="service",
+        help="background mode controlled through a local Unix socket",
+    )
+    mode.add_argument(
+        "--headless",
+        dest="run_mode",
+        action="store_const",
+        const="interactive",
+        help=argparse.SUPPRESS,
+    )
+    mode.add_argument(
+        "--gui",
+        dest="run_mode",
+        action="store_const",
+        const="gui",
+        help="reserved for the display phase",
+    )
+    run.set_defaults(run_mode="interactive")
+
+    control = sub.add_parser("control", help="control a running background service")
+    control.add_argument("action", choices=sorted(CONTROL_COMMANDS))
+    control.add_argument("--socket", type=Path)
 
     test_audio = sub.add_parser("test-audio", help="record and replay a local sample")
     test_audio.add_argument("--seconds", type=float, default=5.0)
@@ -70,7 +102,7 @@ def _budget(settings: Settings) -> BudgetGuard:
     )
 
 
-async def _run(settings: Settings) -> None:
+def _runtime(settings: Settings) -> tuple[AssistantController, SoundDeviceAudioInput]:
     audio_input = SoundDeviceAudioInput(settings.audio)
     audio_output = SoundDeviceAudioOutput(settings.audio)
     cloud = OpenAIProviders(settings.cloud, _budget(settings))
@@ -84,7 +116,17 @@ async def _run(settings: Settings) -> None:
         camera=camera,
         audio_input=audio_input,
     )
-    await run_headless(controller, audio_input)
+    return controller, audio_input
+
+
+async def _run_interactive(settings: Settings) -> None:
+    controller, audio_input = _runtime(settings)
+    await run_interactive(controller, audio_input)
+
+
+async def _run_service(settings: Settings) -> None:
+    controller, audio_input = _runtime(settings)
+    await run_background_service(controller, audio_input, settings.state_dir / "control.sock")
 
 
 async def _test_audio(settings: Settings, seconds: float) -> None:
@@ -158,10 +200,19 @@ def main() -> None:
             asyncio.run(_test_tts(settings, args.language, args.text))
         elif args.command == "test-api":
             asyncio.run(_test_api(settings, args.confirm_paid))
+        elif args.command == "control":
+            socket_path = args.socket or settings.state_dir / "control.sock"
+            response = asyncio.run(send_control_command(socket_path, args.action))
+            print(json.dumps(response, ensure_ascii=False, indent=2))
+            if not response.get("ok"):
+                raise RuntimeError(response.get("message") or response.get("error"))
         elif args.command == "run":
-            if args.gui:
+            if args.run_mode == "gui":
                 raise RuntimeError("GUI is staged after headless hardware acceptance")
-            asyncio.run(_run(settings))
+            if args.run_mode == "service":
+                asyncio.run(_run_service(settings))
+            else:
+                asyncio.run(_run_interactive(settings))
     except KeyboardInterrupt:
         pass
     except Exception as exc:

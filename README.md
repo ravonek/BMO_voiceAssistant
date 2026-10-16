@@ -27,9 +27,12 @@ Realtime API или постоянную передачу видео. Все Res
 
 ## Quick start на Raspberry Pi
 
+Используйте отдельный каталог `~/bmo-cloud`. Существующий `~/be-more-agent`
+остается без изменений.
+
 ```bash
-unzip BMO_Cloud_Assistant_v1.2.zip
-cd be-more-agent
+git clone https://github.com/ravonek/BMO_voiceAssistant.git ~/bmo-cloud
+cd ~/bmo-cloud
 chmod +x scripts/*.sh start_agent.sh setup.sh
 ./scripts/install_bmo_cloud.sh
 ```
@@ -57,19 +60,32 @@ OPENAI_API_KEY=PASTE_A_NEW_KEY_HERE
 .venv/bin/bmo test-audio --seconds 7
 .venv/bin/bmo test-tts --language ru
 .venv/bin/bmo test-tts --language en
-.venv/bin/bmo test-api --confirm-paid   # ровно один явный платный smoke test
-.venv/bin/bmo run --headless
+# Необязательно и только вручную: .venv/bin/bmo test-api --confirm-paid
+.venv/bin/bmo run --interactive
 ```
 
-В headless-режиме Enter начинает и завершает запись, Esc отменяет текущую
+В интерактивном режиме Enter начинает и завершает запись, Esc отменяет текущую
 операцию, `q` завершает приложение. После ответа микрофон открывается на пять
 секунд для follow-up; во время TTS он не слушает.
+
+Для фоновой работы без stdin используйте systemd unit. Он запускает
+`bmo run --service`, а PTT управляется локальным Unix socket:
+
+```bash
+./scripts/install_systemd.sh
+systemctl --user start bmo-headless.service
+.venv/bin/bmo control status
+.venv/bin/bmo control ptt-start
+.venv/bin/bmo control ptt-stop
+```
 
 ## Команды
 
 ```text
 bmo doctor [--json]
-bmo run --headless
+bmo run --interactive
+bmo run --service
+bmo control ptt-start|ptt-stop|cancel|status|shutdown
 bmo test-audio [--seconds 5]
 bmo test-tts --language ru|en
 bmo test-api --confirm-paid

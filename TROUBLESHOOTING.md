@@ -54,7 +54,20 @@ v4l2-ctl --device /dev/video0 --list-formats-ext
 
 ## SSH и клавиши PTT
 
-Запускайте интерактивно: `.venv/bin/bmo run --headless`. Enter — toggle записи,
-Esc — cancel, `q` — выход. Для systemd потребуется физическая кнопка/GUI или
-отдельный управляющий socket; keyboard PTT предназначен для интерактивного MVP.
+Запускайте интерактивно: `.venv/bin/bmo run --interactive`. Enter — toggle
+записи, Esc — cancel, `q` — выход. Этот режим намеренно требует терминал.
+
+Systemd запускает `.venv/bin/bmo run --service` с отключённым stdin. Проверьте
+его и отправьте PTT-команды через защищённый локальный socket:
+
+```bash
+.venv/bin/bmo control status
+.venv/bin/bmo control ptt-start
+.venv/bin/bmo control ptt-stop
+.venv/bin/bmo control cancel
+```
+
+По умолчанию socket находится в `~/.local/state/bmo/control.sock` и доступен
+только владельцу. Если `control` сообщает, что сервис недоступен, проверьте
+`systemctl --user status bmo-headless.service` и journal.
 

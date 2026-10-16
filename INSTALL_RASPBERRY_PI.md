@@ -17,15 +17,19 @@ lsusb
 
 ## 2. Установить проект
 
+Проект устанавливается в отдельный каталог `~/bmo-cloud`. Старый каталог
+`~/be-more-agent` не удаляйте и не изменяйте.
+
 ```bash
-cd ~/be-more-agent
+git clone https://github.com/ravonek/BMO_voiceAssistant.git ~/bmo-cloud
+cd ~/bmo-cloud
 chmod +x scripts/*.sh start_agent.sh setup.sh
 ./scripts/install_bmo_cloud.sh
 ```
 
 Скрипт устанавливает PortAudio/V4L2/FFmpeg, создаёт `.venv`, устанавливает
-Python-пакет и Piper, скачивает RU/EN-модели и проверяет SHA256. Ollama не
-устанавливается и не запускается.
+Python-пакет, pytest и Piper, скачивает RU/EN-модели и проверяет SHA256. Ollama
+не устанавливается и не запускается.
 
 ## 3. Внести новый API-ключ только на Pi
 
@@ -44,7 +48,7 @@ OPENAI_API_KEY=NEW_PROJECT_KEY
 ## 4. Локальные проверки без API
 
 ```bash
-cd ~/be-more-agent
+cd ~/bmo-cloud
 .venv/bin/bmo doctor --json
 .venv/bin/pytest
 .venv/bin/bmo test-audio --seconds 7
@@ -70,8 +74,11 @@ cd ~/be-more-agent
 
 ## 6. Запуск
 
+Интерактивный PTT через SSH/терминал:
+
 ```bash
-.venv/bin/bmo run --headless
+cd ~/bmo-cloud
+.venv/bin/bmo run --interactive
 ```
 
 Проверьте по пять коротких RU и EN фраз. Сохраните фактические результаты, не
@@ -84,6 +91,17 @@ cd ~/be-more-agent
 systemctl --user start bmo-headless.service
 systemctl --user status bmo-headless.service
 journalctl --user -u bmo-headless.service -f
+```
+
+Сервис не читает stdin. Управляйте PTT из другого терминала или будущей
+физической кнопкой/GUI через локальный socket:
+
+```bash
+cd ~/bmo-cloud
+.venv/bin/bmo control status
+.venv/bin/bmo control ptt-start
+.venv/bin/bmo control ptt-stop
+.venv/bin/bmo control cancel
 ```
 
 Откат:

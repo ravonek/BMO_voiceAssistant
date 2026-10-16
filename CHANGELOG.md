@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Installed pytest with the Raspberry Pi development dependencies.
+- Split terminal PTT from the stdin-free systemd service and added local socket control.
+- Moved Raspberry Pi installation instructions to the separate `~/bmo-cloud` directory.
+
 ## 0.1.0
 
 - Replaced the Ollama/Whisper.cpp monolith with a typed modular cloud architecture.

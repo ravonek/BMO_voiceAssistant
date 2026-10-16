@@ -32,7 +32,13 @@ async def _print_events(controller: AssistantController) -> None:
         print(f"\n[{event.state}] {event.message}", flush=True)
 
 
-async def run_headless(controller: AssistantController, audio_input: SoundDeviceAudioInput) -> None:
+async def run_interactive(
+    controller: AssistantController, audio_input: SoundDeviceAudioInput
+) -> None:
+    if not sys.stdin.isatty():
+        raise RuntimeError(
+            "interactive PTT requires a terminal; use 'bmo run --service' for systemd"
+        )
     await controller.start()
     event_task = asyncio.create_task(_print_events(controller))
     turn_task: asyncio.Task[None] | None = None
@@ -71,3 +77,7 @@ async def run_headless(controller: AssistantController, audio_input: SoundDevice
         if turn_task and not turn_task.done():
             await controller.cancel()
         event_task.cancel()
+
+
+# Compatibility for imports from the original headless-first implementation.
+run_headless = run_interactive
